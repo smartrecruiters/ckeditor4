@@ -934,6 +934,20 @@
 				top = Math.max( rect.bottom, editorViewportRect.top );
 			}
 
+			// --------------------- Hack when editor is placed inside of iframe
+			function inIframe () {
+				try {
+					return window.self !== window.top;
+				} catch (e) {
+					return true;
+				}
+			}
+
+			if (inIframe()) { 
+				top = rect.top + 25;
+			}
+			// --------------------- end of hack
+
 			this.element.setStyles( {
 				left: rect.left + 'px',
 				top: top + 'px'
