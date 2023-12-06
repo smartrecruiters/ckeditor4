@@ -971,6 +971,7 @@
 				top = getVerticalPosition( {
 					editorViewportRect: getEditorViewportRect( this.editor ),
 					caretRect: rect,
+					bodyRect: this.element.getDocument().getBody().getClientRect(),
 					viewHeight: this.element.getSize( 'height' ),
 					scrollPositionY: documentWindow.getScrollPosition().y,
 					windowHeight: windowRect.height
@@ -993,6 +994,10 @@
 					scrollPositionY = options.scrollPositionY,
 					windowHeight = options.windowHeight;
 
+				var bodyRectTop = options.bodyRect.top;
+				var caretRectBottom = caretRect.bottom + bodyRectTop;
+				var caretRectTop = caretRect.top + bodyRectTop;
+
 				// If the caret position is below the view - keep it at the bottom edge.
 				// +---------------------------------------------+
 				// |       editor viewport                       |
@@ -1006,8 +1011,8 @@
 				// |     █ - caret position                      |
 				// |                                             |
 				// +---------------------------------------------+
-				if ( editorViewportRect.bottom < caretRect.bottom ) {
-					return Math.min( caretRect.top, editorViewportRect.bottom ) - viewHeight;
+				if ( editorViewportRect.bottom < caretRectBottom ) {
+					return Math.min( caretRectTop, editorViewportRect.bottom ) - viewHeight + (bodyRectTop * -1);
 				}
 
 				// If the view doesn't fit below the caret position and fits above, set it there.
@@ -1025,12 +1030,12 @@
 				// |                                             |
 				// +---------------------------------------------+
 				// How much space is there for the view above and below the specified rect.
-				var spaceAbove = caretRect.top - editorViewportRect.top,
-					spaceBelow = editorViewportRect.bottom - caretRect.bottom,
-					viewExceedsTopViewport = ( caretRect.top - viewHeight ) < scrollPositionY;
+				var spaceAbove = caretRectTop - editorViewportRect.top,
+					spaceBelow = editorViewportRect.bottom - caretRectBottom,
+					viewExceedsTopViewport = ( caretRectTop - viewHeight ) < scrollPositionY;
 
 				if ( viewHeight > spaceBelow && viewHeight < spaceAbove && !viewExceedsTopViewport ) {
-					return caretRect.top - viewHeight;
+					return caretRectTop - viewHeight + (bodyRectTop * -1);
 				}
 
 				// If the caret position is above the view - keep it at the top edge.
@@ -1046,8 +1051,8 @@
 				// |                                             |
 				// |       editor viewport                       |
 				// +---------------------------------------------+
-				if ( editorViewportRect.top > caretRect.top ) {
-					return Math.max( caretRect.bottom, editorViewportRect.top );
+				if ( editorViewportRect.top > caretRectTop ) {
+					return Math.max( caretRectBottom, editorViewportRect.top ) + (bodyRectTop * -1);
 				}
 
 				// (#3582)
@@ -1065,10 +1070,10 @@
 				// |                                             |
 				// |                                             |
 				// +---------------------------------------------+
-				var viewExceedsBottomViewport = ( caretRect.bottom + viewHeight ) > ( windowHeight + scrollPositionY );
+				var viewExceedsBottomViewport = ( caretRectBottom + viewHeight ) > ( windowHeight + scrollPositionY );
 
 				if ( !( viewHeight > spaceBelow && viewHeight < spaceAbove ) && viewExceedsBottomViewport ) {
-					return caretRect.top - viewHeight;
+					return caretRectTop - viewHeight + (bodyRectTop * -1);
 				}
 
 				// As a default, keep the view inside the editor viewport.
@@ -1084,7 +1089,7 @@
 				// |                                             |
 				// |                                             |
 				// +---------------------------------------------+
-				return Math.min( editorViewportRect.bottom, caretRect.bottom );
+				return Math.min( editorViewportRect.bottom, caretRectBottom ) + (bodyRectTop * -1);
 			}
 
 			function getHorizontalPosition( options ) {
