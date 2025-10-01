@@ -215,7 +215,9 @@ CKEDITOR.resourceManager.prototype = {
 
 		CKEDITOR.scriptLoader.load( urls, function( completed, failed ) {
 			if ( failed.length ) {
-				throw new Error( '[CKEDITOR.resourceManager.load] Resource name "' + urlsNames[ failed[ 0 ] ].join( ',' ) +
+				// throw new Error( '[CKEDITOR.resourceManager.load] Resource name "' + urlsNames[ failed[ 0 ] ].join( ',' ) +
+				// 	'" was not found at "' + failed[ 0 ] + '".' );
+				console.error( '[CKEDITOR.resourceManager.load] Resource name "' + urlsNames[ failed[ 0 ] ].join( ',' ) +
 					'" was not found at "' + failed[ 0 ] + '".' );
 			}
 
