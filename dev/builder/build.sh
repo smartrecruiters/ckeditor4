@@ -21,7 +21,7 @@ RESET_STYLE='\033[0m'
 PROGNAME=$(basename $0)
 MSG_UPDATE_FAILED="Warning: The attempt to update ckbuilder.jar failed. The existing file will be used.\n"
 MSG_DOWNLOAD_FAILED="It was not possible to download ckbuilder.jar.\n"
-MSG_INCORRECT_JDK_VERSION="${RED}Your JDK version is not supported, there may be a problem to finish build process. Please change the JDK version to 15 or lower.${RED} ${GREEN}https://jdk.java.net/archive/${GREEN}\n"
+MSG_INCORRECT_JDK_VERSION="${RED}Your JDK version is not supported, there may be a problem to finish build process. Please use JDK 15 or lower, or 21 with compatibility flags.${RED} ${GREEN}https://jdk.java.net/archive/${GREEN}\n"
 ARGS=" $@ "
 
 function error_exit
@@ -64,8 +64,15 @@ printf "Starting CKBuilder...\n"
 
 jdk_version=$( echo `java -version 2>&1 | grep 'version' 2>&1 | awk -F\" '{ split($2,a,"."); print a[1]}'` | bc -l);
 regex='^[0-9]+$';
-# Builder is crashing when JDK version is newer than 15.
-if ! [[ $jdk_version =~ $regex ]] || [ $jdk_version -gt 15 ]; then
+
+# JVM args for Java 16+ so that older ckbuilder.jar can run (opens encapsulated packages).
+JAVA_OPTS=""
+if [[ $jdk_version =~ $regex ]] && [ $jdk_version -ge 16 ]; then
+	JAVA_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.desktop/sun.java2d=ALL-UNNAMED"
+fi
+
+# Builder may crash when JDK version is newer than 15 and not 21 with the opts above.
+if ! [[ $jdk_version =~ $regex ]] || ( [ $jdk_version -gt 15 ] && [ $jdk_version -ne 21 ] ); then
 	printf "${MSG_INCORRECT_JDK_VERSION}\n";
 	printf "${UNDERLINE}${YELLOW}Actual version of JDK: ${jdk_version}${RESET_STYLE}\n";
 fi
@@ -85,12 +92,12 @@ then
 fi
 
 {
-	java -jar ckbuilder/$CKBUILDER_VERSION/ckbuilder.jar --build ../../ release $JAVA_ARGS --version="$VERSION" --revision="$REVISION" --overwrite
+	java $JAVA_OPTS -jar ckbuilder/$CKBUILDER_VERSION/ckbuilder.jar --build ../../ release $JAVA_ARGS --version="$VERSION" --revision="$REVISION" --overwrite
 } || {
 	if ! [[ $jdk_version =~ $regex ]] || [ $jdk_version -gt 15 ]; then
 		printf "\n${RED}The build has been stopped. Please verify the eventual error messages above.${RESET_STYLE}\n"
-		exit 1
 	fi
+	exit 1
 }
 
 # Copy and build tests.
