@@ -8,6 +8,19 @@
 [![Join newsletter](https://img.shields.io/badge/join-newsletter-00cc99.svg)](http://eepurl.com/c3zRPr)
 [![Follow Twitter](https://img.shields.io/badge/follow-twitter-00cc99.svg)](https://twitter.com/ckeditor)
 
+---
+
+## 📌 Fork notice & release process
+
+**This repository is a forked version of CKEditor.** It is maintained separately from the upstream [ckeditor/ckeditor4](https://github.com/ckeditor/ckeditor4) project.
+
+When changes are merged into this fork, the following steps are required to release them:
+
+1. **Manual release** — Run a **[custom Jenkins job](https://piper.srinternal.net/view/F4/job/refine.ckeditor.publish/)** to build and release the new version.
+2. **Version bump** — After the release is published, update the version in the consuming **[@fantastic/rich-text-editor](https://www.npmjs.com/package/@fantastic/rich-text-editor)** package so it depends on the new CKEditor build.
+
+---
+
 ## ⚠️ CKEditor 4: End of Life and Extended Support Model until Dec 2026
 
 CKEditor 4 was launched in 2012 and reached its End of Life (EOL) on June 30, 2023.
